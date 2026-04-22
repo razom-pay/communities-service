@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client"
+  output = "./generated"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CommunityVisibility {
+  PUBLIC
+  PRIVATE
+
+  @@map("community_visibility")
+}
+
+enum CommunityRole {
+  OWNER
+  MODERATOR
+  MEMBER
+
+  @@map("community_role")
+}
+
+enum CommunityInviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELED
+
+  @@map("community_invite_status")
+}
+
+model Community {
+  id String @id @default(nanoid())
+
+  description String
+  visibility CommunityVisibility @default(PUBLIC)
+
+  locationCountry String? @map("location_country")
+  locationCity String? @map("location_city")
+  locationStreet String? @map("location_street")
+  locationHouse String? @map("location_house")
+
+  avatar String?
+  cover String?
+
+  membersCount Int @default(1) @map("members_count")
+  createdByUserId String @map("created_by_user_id")
+
+  memberships CommunityMembership[]
+  invites CommunityInvite[]
+  bans CommunityBan[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("communities")
+}
+
+model CommunityMembership {
+  id String @id @default(nanoid())
+
+  communityId String @map("community_id")
+  userId String @map("user_id")
+  role CommunityRole @default(MEMBER)
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([communityId, userId])
+  @@index([userId])
+  @@map("community_memberships")
+}
+
+model CommunityInvite {
+  id String @id @default(nanoid())
+
+  communityId String @map("community_id")
+  invitedUserId String @map("invited_user_id")
+  invitedByUserId String @map("invited_by_user_id")
+  status CommunityInviteStatus @default(PENDING)
+  expiresAt DateTime @map("expires_at")
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([communityId, invitedUserId])
+  @@index([status, expiresAt])
+  @@map("community_invites")
+}
+
+model CommunityBan {
+  id String @id @default(nanoid())
+
+  communityId String @map("community_id")
+  userId String @map("user_id")
+  bannedByUserId String @map("banned_by_user_id")
+
+  reason String?
+  expiresAt DateTime? @map("expires_at")
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([communityId, userId])
+  @@index([expiresAt])
+  @@map("community_bans")
+}
