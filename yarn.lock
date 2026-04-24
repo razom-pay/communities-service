@@ -2097,9 +2097,9 @@
     "@razom-pay/contracts" "^1.1.7"
 
 "@razom-pay/contracts@^1.1.7":
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/@razom-pay/contracts/-/contracts-1.1.7.tgz#fa63f85cb999b84fa341f01814c8bd4f1d16510f"
-  integrity sha512-2HqkcqUJrbgmF+grpMh+Tk/9R57wR6w704ybmjtCX02uJOLN5WpbmaT8vySU3Fm9JkKolbNEHVb5Ob+1E2cFng==
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/@razom-pay/contracts/-/contracts-1.1.8.tgz#9a60d1ccaa05c3c9fb9ebf6dbbb29bab323da1ff"
+  integrity sha512-+wr/U9pYj7fLs31yyNfv9XaVRNgNPnETfNplVRaaOjAzVsQNJhkp8ag+A+b/UGyOPMNnAFYCBrbNAyDv2GAN2Q==
   dependencies:
     "@nestjs/microservices" "^11.1.17"
     rxjs "^7.8.2"
