@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import { ScheduleModule } from '@nestjs/schedule'
 import { LoggerModule } from 'nestjs-pino'
 
 import { PrismaModule } from './infra/prisma/prisma.module'
@@ -16,6 +17,7 @@ import { ObservabilityModule } from './observability/observability.module'
 				'.env'
 			]
 		}),
+		ScheduleModule.forRoot(),
 		LoggerModule.forRoot({
 			pinoHttp: {
 				level: process.env.LOG_LEVEL,

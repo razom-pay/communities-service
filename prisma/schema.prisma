@@ -32,6 +32,49 @@ enum CommunityInviteStatus {
   @@map("community_invite_status")
 }
 
+enum InitiativeType {
+  CROWDFUNDING
+  WHOLESALE
+
+  @@map("initiative_type")
+}
+
+enum InitiativeStatus {
+  ACTIVE
+  SETTLING
+  SUCCEEDED
+  FAILED
+  CANCELED
+
+  @@map("initiative_status")
+}
+
+enum InitiativeContributionRuleType {
+  ANY
+  MIN_ONLY
+  FIXED
+  RANGE
+
+  @@map("initiative_contribution_rule_type")
+}
+
+enum InitiativeContributionStatus {
+  HELD
+  CAPTURED
+  REFUNDED
+  PARTIALLY_REFUNDED
+
+  @@map("initiative_contribution_status")
+}
+
+enum InitiativeSettlementOutcome {
+  SUCCESS
+  FAILED
+  CANCELED
+
+  @@map("initiative_settlement_outcome")
+}
+
 model Community {
   id String @id @default(nanoid())
 
@@ -52,6 +95,7 @@ model Community {
   memberships CommunityMembership[]
   invites CommunityInvite[]
   bans CommunityBan[]
+  initiatives CommunityInitiative[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -112,4 +156,106 @@ model CommunityBan {
   @@unique([communityId, userId])
   @@index([expiresAt])
   @@map("community_bans")
+}
+
+model CommunityInitiative {
+  id String @id @default(nanoid())
+
+  communityId String @map("community_id")
+  organizerUserId String @map("organizer_user_id")
+
+  type InitiativeType
+  status InitiativeStatus @default(ACTIVE)
+
+  title String
+  description String
+  currency String @default("UAH")
+
+  organizerFeeMinor BigInt @map("organizer_fee_minor")
+  goalAmountMinor BigInt? @map("goal_amount_minor")
+
+  crowdfundingRuleType InitiativeContributionRuleType? @map("crowdfunding_rule_type")
+  crowdfundingMinAmountMinor BigInt? @map("crowdfunding_min_amount_minor")
+  crowdfundingFixedAmountMinor BigInt? @map("crowdfunding_fixed_amount_minor")
+  crowdfundingMaxAmountMinor BigInt? @map("crowdfunding_max_amount_minor")
+
+  minSuccessUnits Int? @map("min_success_units")
+  maxUnits Int? @map("max_units")
+
+  collectedAmountMinor BigInt @default(0) @map("collected_amount_minor")
+  collectedUnits Int @default(0) @map("collected_units")
+
+  deadlineAt DateTime @map("deadline_at")
+  settlementOutcome InitiativeSettlementOutcome? @map("settlement_outcome")
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  wholesaleTiers CommunityInitiativeWholesaleTier[]
+  contributions CommunityInitiativeContribution[]
+  settlement CommunityInitiativeSettlement?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([communityId, status, deadlineAt])
+  @@index([organizerUserId, createdAt])
+  @@map("community_initiatives")
+}
+
+model CommunityInitiativeWholesaleTier {
+  id String @id @default(nanoid())
+
+  initiativeId String @map("initiative_id")
+  minUnits Int @map("min_units")
+  unitPriceMinor BigInt @map("unit_price_minor")
+
+  initiative CommunityInitiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([initiativeId, minUnits])
+  @@index([initiativeId, minUnits])
+  @@map("community_initiative_wholesale_tiers")
+}
+
+model CommunityInitiativeContribution {
+  id String @id @default(nanoid())
+
+  initiativeId String @map("initiative_id")
+  contributorUserId String @map("contributor_user_id")
+  requestId String @map("request_id")
+
+  amountMinor BigInt @map("amount_minor")
+  units Int @default(0)
+
+  status InitiativeContributionStatus @default(HELD)
+  capturedAmountMinor BigInt @default(0) @map("captured_amount_minor")
+  refundedAmountMinor BigInt @default(0) @map("refunded_amount_minor")
+
+  initiative CommunityInitiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([initiativeId, requestId])
+  @@index([initiativeId, contributorUserId])
+  @@index([initiativeId, createdAt, id])
+  @@map("community_initiative_contributions")
+}
+
+model CommunityInitiativeSettlement {
+  id String @id @default(nanoid())
+
+  initiativeId String @unique @map("initiative_id")
+  outcome InitiativeSettlementOutcome
+
+  totalHeldMinor BigInt @map("total_held_minor")
+  totalCapturedMinor BigInt @map("total_captured_minor")
+  totalRefundedMinor BigInt @map("total_refunded_minor")
+  finalUnitPriceMinor BigInt? @map("final_unit_price_minor")
+
+  initiative CommunityInitiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("community_initiative_settlements")
 }
