@@ -3,29 +3,30 @@ import { PinoLogger } from 'nestjs-pino'
 
 import { PrismaService } from '@/infra/prisma/prisma.service'
 
+import { CommunitiesRepository } from './communities.repository'
+import { CommunitiesService } from './communities.service'
 import { CommunityBanRepository } from './community-ban.repository'
 import { CommunityInviteRepository } from './community-invite.repository'
 import { CommunityMembershipRepository } from './community-membership.repository'
-import { CommunityRepository } from './community.repository'
-import { CommunityService } from './community.service'
 
 jest.mock('@/infra/prisma/prisma.service', () => ({
 	PrismaService: class PrismaService {}
 }))
 
-describe('CommunityService RBAC', () => {
-	let service: CommunityService
+describe('CommunitiesService RBAC', () => {
+	let service: CommunitiesService
 
 	beforeEach(() => {
-		service = new CommunityService(
+		service = new CommunitiesService(
 			{ setContext: jest.fn(), info: jest.fn() } as unknown as PinoLogger,
 			{} as PrismaService,
-			{} as CommunityRepository,
+			{} as CommunitiesRepository,
 			{} as CommunityMembershipRepository,
 			{} as CommunityInviteRepository,
 			{} as CommunityBanRepository
 		)
 	})
+
 
 	it('owner can ban moderator', () => {
 		expect(() =>

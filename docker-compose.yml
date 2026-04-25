@@ -1,9 +1,9 @@
 version: '3.9'
 
 services:
-    community-service:
-        container_name: community-service
-        image: razom-pay/community-service:dev
+    communities-service:
+        container_name: communities-service
+        image: razom-pay/communities-service:dev
         build:
             context: .
             dockerfile: Dockerfile
@@ -11,7 +11,7 @@ services:
         env_file:
             - .env.production.local
         volumes:
-            - ../.logs/community:/var/log/services/community
+            - ../.logs/communities:/var/log/services/communities
         networks:
             - razom-pay
 

@@ -18,7 +18,7 @@ export class GrpcMetricsInterceptor implements NestInterceptor {
 		@InjectMetric('grpc_request_duration_seconds')
 		private readonly histogram: Histogram<string>
 	) {
-		this.SERVICE_NAME = 'community'
+		this.SERVICE_NAME = 'communities'
 	}
 
 	intercept(

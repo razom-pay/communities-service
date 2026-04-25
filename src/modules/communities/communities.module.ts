@@ -1,20 +1,21 @@
 import { Module } from '@nestjs/common'
-
+ 
+import { CommunitiesController } from './communities.controller'
+import { CommunitiesRepository } from './communities.repository'
+import { CommunitiesService } from './communities.service'
 import { CommunityBanRepository } from './community-ban.repository'
 import { CommunityInviteRepository } from './community-invite.repository'
 import { CommunityMembershipRepository } from './community-membership.repository'
-import { CommunityController } from './community.controller'
-import { CommunityRepository } from './community.repository'
-import { CommunityService } from './community.service'
-
+ 
 @Module({
-	controllers: [CommunityController],
+	controllers: [CommunitiesController],
 	providers: [
-		CommunityService,
-		CommunityRepository,
+		CommunitiesService,
+		CommunitiesRepository,
 		CommunityMembershipRepository,
 		CommunityInviteRepository,
 		CommunityBanRepository
 	]
 })
-export class CommunityModule {}
+export class CommunitiesModule {}
+

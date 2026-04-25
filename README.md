@@ -1,6 +1,6 @@
-# community-service
+# communities-service
 
-Community domain microservice for Razom Pay.
+Communities domain microservice for Razom Pay.
 
 ## Run
 

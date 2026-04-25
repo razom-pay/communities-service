@@ -32,10 +32,10 @@ import { PinoLogger } from 'nestjs-pino'
 
 import { PrismaService } from '@/infra/prisma/prisma.service'
 
+import { CommunitiesRepository } from './communities.repository'
 import { CommunityBanRepository } from './community-ban.repository'
 import { CommunityInviteRepository } from './community-invite.repository'
 import { CommunityMembershipRepository } from './community-membership.repository'
-import { CommunityRepository } from './community.repository'
 
 const ROLE_RANK: Record<PrismaCommunityRole, number> = {
 	MEMBER: 1,
@@ -56,23 +56,23 @@ const PROTO_INVITE_STATUS_DECLINED = 3 as ProtoInviteStatus
 const PROTO_INVITE_STATUS_CANCELED = 4 as ProtoInviteStatus
 
 @Injectable()
-export class CommunityService {
+export class CommunitiesService {
 	constructor(
 		private readonly logger: PinoLogger,
 		private readonly prismaService: PrismaService,
-		private readonly communityRepository: CommunityRepository,
+		private readonly communitiesRepository: CommunitiesRepository,
 		private readonly membershipRepository: CommunityMembershipRepository,
 		private readonly inviteRepository: CommunityInviteRepository,
 		private readonly banRepository: CommunityBanRepository
 	) {
-		this.logger.setContext(CommunityService.name)
+		this.logger.setContext(CommunitiesService.name)
 	}
 
 	async createCommunity(data: CreateCommunityRequest) {
 		this.logger.info(`CreateCommunity requested by userId=${data.userId}`)
 
 		const community = await this.prismaService.$transaction(async tx => {
-			const created = await this.communityRepository.create(
+			const created = await this.communitiesRepository.create(
 				{
 					description: data.description,
 					visibility: this.toVisibility(data.visibility),
@@ -103,7 +103,7 @@ export class CommunityService {
 	}
 
 	async getCommunity(data: GetCommunityRequest) {
-		const community = await this.communityRepository.findById(
+		const community = await this.communitiesRepository.findById(
 			data.communityId
 		)
 
@@ -116,7 +116,7 @@ export class CommunityService {
 
 	async patchCommunity(data: PatchCommunityRequest) {
 		const updated = await this.prismaService.$transaction(async tx => {
-			const community = await this.communityRepository.findById(
+			const community = await this.communitiesRepository.findById(
 				data.communityId,
 				tx
 			)
@@ -156,7 +156,7 @@ export class CommunityService {
 				})
 			}
 
-			return this.communityRepository.update(
+			return this.communitiesRepository.update(
 				data.communityId,
 				payload,
 				tx
@@ -169,7 +169,7 @@ export class CommunityService {
 	}
 
 	async listMyCommunities(data: ListMyCommunitiesRequest) {
-		const memberships = await this.communityRepository.listByUserId(
+		const memberships = await this.communitiesRepository.listByUserId(
 			data.userId
 		)
 
@@ -182,7 +182,7 @@ export class CommunityService {
 
 	async joinCommunity(data: JoinCommunityRequest) {
 		await this.prismaService.$transaction(async tx => {
-			const community = await this.communityRepository.findById(
+			const community = await this.communitiesRepository.findById(
 				data.communityId,
 				tx
 			)
@@ -579,7 +579,7 @@ export class CommunityService {
 			communityId,
 			tx
 		)
-		await this.communityRepository.updateMembersCount(
+		await this.communitiesRepository.updateMembersCount(
 			communityId,
 			membersCount,
 			tx
@@ -700,3 +700,4 @@ export class CommunityService {
 		this.fail(RpcStatus.NOT_FOUND, message)
 	}
 }
+
