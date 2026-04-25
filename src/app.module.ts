@@ -26,7 +26,9 @@ import { ObservabilityModule } from './observability/observability.module'
 								target: 'pino/file',
 								options: {
 									destination:
-										'/var/log/services/communities/communities.log',
+										process.platform === 'linux'
+											? '/var/log/services/communities/communities.log'
+											: '.logs/communities/communities.log',
 									mkdir: true
 								}
 							},
