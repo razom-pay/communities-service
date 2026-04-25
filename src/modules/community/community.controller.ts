@@ -14,7 +14,7 @@ import type {
 	ListMyCommunitiesRequest,
 	PatchCommunityRequest,
 	UnbanMemberRequest
-} from '@razom-pay/contracts/gen/community'
+} from '@razom-pay/contracts/gen/communities'
 
 import { CommunityService } from './community.service'
 

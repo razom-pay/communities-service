@@ -27,7 +27,7 @@ import {
 	type CommunityRole as ProtoRole,
 	type CommunityVisibility as ProtoVisibility,
 	type UnbanMemberRequest
-} from '@razom-pay/contracts/gen/community'
+} from '@razom-pay/contracts/gen/communities'
 import { PinoLogger } from 'nestjs-pino'
 
 import { PrismaService } from '@/infra/prisma/prisma.service'
