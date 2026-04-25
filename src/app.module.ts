@@ -18,15 +18,18 @@ import { ObservabilityModule } from './observability/observability.module'
 		}),
 		LoggerModule.forRoot({
 			pinoHttp: {
-				level: process.env.LOG_LEVEL,
-				transport: {
-					target: 'pino/file',
-					options: {
-						destination:
-							'/var/log/services/communities/communities.log',
-						mkdir: true
-					}
-				},
+				level: process.env.LOG_LEVEL || 'info',
+				transport:
+					process.env.NODE_ENV === 'test'
+						? undefined
+						: {
+								target: 'pino/file',
+								options: {
+									destination:
+										'/var/log/services/communities/communities.log',
+									mkdir: true
+								}
+							},
 				messageKey: 'msg',
 				customProps: () => ({
 					service: 'communities-service'
