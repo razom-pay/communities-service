@@ -3,7 +3,6 @@ import { RpcException } from '@nestjs/microservices'
 import { Prisma } from '@prisma/generated/client'
 import { RpcStatus } from '@razom-pay/common'
 import {
-	ContributeToInitiativeRequest,
 	CreateInitiativeRequest,
 	InitiativeStatus,
 	InitiativeType
@@ -54,8 +53,7 @@ export class InitiativesService {
 		if (isNaN(deadline.getTime())) {
 			throw new RpcException({
 				code: RpcStatus.INVALID_ARGUMENT,
-				message:
-					'Invalid deadline: must be a valid ISO 8601 date string'
+				message: 'Invalid deadline: must be a valid ISO 8601 date string'
 			})
 		}
 
@@ -72,8 +70,7 @@ export class InitiativesService {
 			maxContribution: data.maxContribution,
 			exactContribution: data.exactContribution,
 			wholesaleMaxQuantity: data.wholesaleMaxQuantity,
-			wholesaleTiers:
-				data.wholesaleTiers as unknown as Prisma.InputJsonValue
+			wholesaleTiers: data.wholesaleTiers as unknown as Prisma.InputJsonValue
 		}
 
 		try {
@@ -107,10 +104,12 @@ export class InitiativesService {
 		return initiatives.map(i => this.mapToProto(i))
 	}
 
-	async contributeToInitiative(data: ContributeToInitiativeRequest) {
-		const initiative = await this.initiativesRepository.findById(
-			data.initiativeId
-		)
+	async updateInitiativeStatus(
+		initiativeId: string,
+		status: InitiativeStatus
+	) {
+		const initiative =
+			await this.initiativesRepository.findById(initiativeId)
 		if (!initiative) {
 			throw new RpcException({
 				code: RpcStatus.NOT_FOUND,
@@ -118,68 +117,33 @@ export class InitiativesService {
 			})
 		}
 
-		await this.ensureMember(initiative.communityId, data.userId)
+		const prismaStatus = this.protoStatusToPrisma(status)
+		const updated = await this.initiativesRepository.updateStatus(
+			initiativeId,
+			prismaStatus
+		)
+		return this.mapToProto(updated)
+	}
 
-		if (initiative.status !== 'ACTIVE') {
-			throw new RpcException({
-				code: RpcStatus.FAILED_PRECONDITION,
-				message: 'Initiative is not active'
-			})
-		}
-
-		if (new Date() > initiative.deadline) {
-			throw new RpcException({
-				code: RpcStatus.FAILED_PRECONDITION,
-				message: 'Initiative deadline has passed'
-			})
-		}
-
-		if (initiative.type === 'CROWDFUNDING') {
-			if (
-				initiative.minContribution &&
-				data.amount < initiative.minContribution
-			) {
+	private protoStatusToPrisma(
+		status: InitiativeStatus
+	): 'ACTIVE' | 'COMPLETED' | 'FAILED' | 'CANCELLED' | 'PROCESSING' {
+		switch (status) {
+			case InitiativeStatus.INITIATIVE_STATUS_ACTIVE:
+				return 'ACTIVE'
+			case InitiativeStatus.INITIATIVE_STATUS_COMPLETED:
+				return 'COMPLETED'
+			case InitiativeStatus.INITIATIVE_STATUS_FAILED:
+				return 'FAILED'
+			case InitiativeStatus.INITIATIVE_STATUS_CANCELLED:
+				return 'CANCELLED'
+			case InitiativeStatus.INITIATIVE_STATUS_PROCESSING:
+				return 'PROCESSING'
+			default:
 				throw new RpcException({
 					code: RpcStatus.INVALID_ARGUMENT,
-					message: `Minimum contribution is ${initiative.minContribution}`
+					message: 'Invalid initiative status'
 				})
-			}
-			if (
-				initiative.maxContribution &&
-				data.amount > initiative.maxContribution
-			) {
-				throw new RpcException({
-					code: RpcStatus.INVALID_ARGUMENT,
-					message: `Maximum contribution is ${initiative.maxContribution}`
-				})
-			}
-			if (
-				initiative.exactContribution &&
-				data.amount !== initiative.exactContribution
-			) {
-				throw new RpcException({
-					code: RpcStatus.INVALID_ARGUMENT,
-					message: `Contribution must be exactly ${initiative.exactContribution}`
-				})
-			}
-		}
-
-		const contribution =
-			await this.initiativesRepository.createContribution({
-				initiative: { connect: { id: initiative.id } },
-				userId: data.userId,
-				amount: data.amount,
-				status: 'PENDING'
-			})
-
-		return {
-			id: contribution.id,
-			initiativeId: contribution.initiativeId,
-			userId: contribution.userId,
-			amount: contribution.amount,
-			status: contribution.status,
-			createdAt: contribution.createdAt.toISOString(),
-			updatedAt: contribution.updatedAt.toISOString()
 		}
 	}
 
@@ -217,6 +181,8 @@ export class InitiativesService {
 				return InitiativeStatus.INITIATIVE_STATUS_FAILED
 			case 'CANCELLED':
 				return InitiativeStatus.INITIATIVE_STATUS_CANCELLED
+			case 'PROCESSING':
+				return InitiativeStatus.INITIATIVE_STATUS_PROCESSING
 			default:
 				return InitiativeStatus.INITIATIVE_STATUS_UNSPECIFIED
 		}

@@ -1,14 +1,14 @@
 import { Controller } from '@nestjs/common'
 import { GrpcMethod } from '@nestjs/microservices'
 import type {
-	ContributeToInitiativeRequest,
-	ContributeToInitiativeResponse,
 	CreateInitiativeRequest,
 	CreateInitiativeResponse,
 	GetInitiativeRequest,
 	GetInitiativeResponse,
 	ListCommunityInitiativesRequest,
-	ListCommunityInitiativesResponse
+	ListCommunityInitiativesResponse,
+	UpdateInitiativeStatusRequest,
+	UpdateInitiativeStatusResponse
 } from '@razom-pay/contracts/gen/communities'
 
 import { InitiativesService } from './initiatives.service'
@@ -46,12 +46,14 @@ export class InitiativesController {
 		return { initiatives }
 	}
 
-	@GrpcMethod('CommunitiesService', 'ContributeToInitiative')
-	async contributeToInitiative(
-		data: ContributeToInitiativeRequest
-	): Promise<ContributeToInitiativeResponse> {
-		const contribution =
-			await this.initiativesService.contributeToInitiative(data)
-		return { contribution }
+	@GrpcMethod('CommunitiesService', 'UpdateInitiativeStatus')
+	async updateInitiativeStatus(
+		data: UpdateInitiativeStatusRequest
+	): Promise<UpdateInitiativeStatusResponse> {
+		const initiative = await this.initiativesService.updateInitiativeStatus(
+			data.initiativeId,
+			data.status
+		)
+		return { initiative }
 	}
 }

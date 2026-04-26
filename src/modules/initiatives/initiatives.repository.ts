@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { Prisma } from '@prisma/generated/client'
+import type { InitiativeStatus, Prisma } from '@prisma/generated/client'
 
 import { PrismaService } from '@/infra/prisma/prisma.service'
 
@@ -12,9 +12,7 @@ export class InitiativesRepository {
 	}
 
 	async findById(id: string) {
-		return this.prisma.initiative.findUnique({
-			where: { id }
-		})
+		return this.prisma.initiative.findUnique({ where: { id } })
 	}
 
 	async listByCommunityId(communityId: string) {
@@ -24,7 +22,19 @@ export class InitiativesRepository {
 		})
 	}
 
-	async createContribution(data: Prisma.InitiativeContributionCreateInput) {
-		return this.prisma.initiativeContribution.create({ data })
+	async updateStatus(id: string, status: InitiativeStatus) {
+		return this.prisma.initiative.update({
+			where: { id },
+			data: { status }
+		})
+	}
+
+	async findExpiredActive(now: Date) {
+		return this.prisma.initiative.findMany({
+			where: {
+				status: 'ACTIVE',
+				deadline: { lte: now }
+			}
+		})
 	}
 }

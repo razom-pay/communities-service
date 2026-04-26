@@ -44,6 +44,7 @@ enum InitiativeStatus {
   COMPLETED
   FAILED
   CANCELLED
+  PROCESSING
 
   @@map("initiative_status")
 }
@@ -154,28 +155,11 @@ model Initiative {
   wholesaleTiers Json? @map("wholesale_tiers") // E.g. [{ minQuantity: 50, price: 30000 }]
 
   community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  contributions InitiativeContribution[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([communityId, status])
+  @@index([status, deadline])
   @@map("community_initiatives")
-}
-
-model InitiativeContribution {
-  id String @id @default(nanoid())
-  initiativeId String @map("initiative_id")
-  userId String @map("user_id")
-
-  amount Int // Contributed amount in kopiiky
-  status String @default("PENDING")
-
-  initiative Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@index([initiativeId, userId])
-  @@map("initiative_contributions")
 }
