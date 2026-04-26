@@ -6,7 +6,7 @@ export const grpcProtoPaths = [PROTO_PATHS.COMMUNITIES]
 export const grpcLoader: NonNullable<GrpcOptions['options']['loader']> = {
 	keepCase: false,
 	longs: String,
-	enums: String,
+	enums: Number,
 	defaults: true,
 	oneofs: true
 }

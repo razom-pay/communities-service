@@ -23,9 +23,9 @@ import {
 	type ListCommunityMembersRequest,
 	type ListMyCommunitiesRequest,
 	type PatchCommunityRequest,
-	type CommunityInviteStatus as ProtoInviteStatus,
-	type CommunityRole as ProtoRole,
-	type CommunityVisibility as ProtoVisibility,
+	CommunityInviteStatus as ProtoInviteStatus,
+	CommunityRole as ProtoRole,
+	CommunityVisibility as ProtoVisibility,
 	type UnbanMemberRequest
 } from '@razom-pay/contracts/gen/communities'
 import { PinoLogger } from 'nestjs-pino'
@@ -42,18 +42,6 @@ const ROLE_RANK: Record<PrismaCommunityRole, number> = {
 	MODERATOR: 2,
 	OWNER: 3
 }
-
-const PROTO_VISIBILITY_PUBLIC = 1 as ProtoVisibility
-const PROTO_VISIBILITY_PRIVATE = 2 as ProtoVisibility
-
-const PROTO_ROLE_MEMBER = 1 as ProtoRole
-const PROTO_ROLE_MODERATOR = 2 as ProtoRole
-const PROTO_ROLE_OWNER = 3 as ProtoRole
-
-const PROTO_INVITE_STATUS_PENDING = 1 as ProtoInviteStatus
-const PROTO_INVITE_STATUS_ACCEPTED = 2 as ProtoInviteStatus
-const PROTO_INVITE_STATUS_DECLINED = 3 as ProtoInviteStatus
-const PROTO_INVITE_STATUS_CANCELED = 4 as ProtoInviteStatus
 
 @Injectable()
 export class CommunitiesService {
@@ -590,13 +578,9 @@ export class CommunitiesService {
 		value: ProtoVisibility | string | number
 	): PrismaCommunityVisibility {
 		switch (value) {
-			case 'COMMUNITY_VISIBILITY_PUBLIC':
-			case 'PUBLIC':
-			case PROTO_VISIBILITY_PUBLIC:
+			case ProtoVisibility.COMMUNITY_VISIBILITY_PUBLIC:
 				return 'PUBLIC'
-			case 'COMMUNITY_VISIBILITY_PRIVATE':
-			case 'PRIVATE':
-			case PROTO_VISIBILITY_PRIVATE:
+			case ProtoVisibility.COMMUNITY_VISIBILITY_PRIVATE:
 				return 'PRIVATE'
 			default:
 				this.fail(
@@ -608,11 +592,11 @@ export class CommunitiesService {
 
 	private toRole(value: ProtoRole): PrismaCommunityRole {
 		switch (value) {
-			case PROTO_ROLE_MEMBER:
+			case ProtoRole.COMMUNITY_ROLE_MEMBER:
 				return 'MEMBER'
-			case PROTO_ROLE_MODERATOR:
+			case ProtoRole.COMMUNITY_ROLE_MODERATOR:
 				return 'MODERATOR'
-			case PROTO_ROLE_OWNER:
+			case ProtoRole.COMMUNITY_ROLE_OWNER:
 				return 'OWNER'
 			default:
 				this.fail(RpcStatus.INVALID_ARGUMENT, 'Invalid community role')
@@ -621,32 +605,32 @@ export class CommunitiesService {
 
 	private mapVisibility(value: PrismaCommunityVisibility) {
 		if (value === 'PRIVATE') {
-			return PROTO_VISIBILITY_PRIVATE
+			return ProtoVisibility.COMMUNITY_VISIBILITY_PRIVATE
 		}
-		return PROTO_VISIBILITY_PUBLIC
+		return ProtoVisibility.COMMUNITY_VISIBILITY_PUBLIC
 	}
 
 	private mapRole(value: PrismaCommunityRole) {
 		switch (value) {
 			case 'OWNER':
-				return PROTO_ROLE_OWNER
+				return ProtoRole.COMMUNITY_ROLE_OWNER
 			case 'MODERATOR':
-				return PROTO_ROLE_MODERATOR
+				return ProtoRole.COMMUNITY_ROLE_MODERATOR
 			default:
-				return PROTO_ROLE_MEMBER
+				return ProtoRole.COMMUNITY_ROLE_MEMBER
 		}
 	}
 
 	private mapInviteStatus(value: CommunityInviteStatus) {
 		switch (value) {
 			case 'ACCEPTED':
-				return PROTO_INVITE_STATUS_ACCEPTED
+				return ProtoInviteStatus.COMMUNITY_INVITE_STATUS_ACCEPTED
 			case 'DECLINED':
-				return PROTO_INVITE_STATUS_DECLINED
+				return ProtoInviteStatus.COMMUNITY_INVITE_STATUS_DECLINED
 			case 'CANCELED':
-				return PROTO_INVITE_STATUS_CANCELED
+				return ProtoInviteStatus.COMMUNITY_INVITE_STATUS_CANCELED
 			default:
-				return PROTO_INVITE_STATUS_PENDING
+				return ProtoInviteStatus.COMMUNITY_INVITE_STATUS_PENDING
 		}
 	}
 
@@ -700,4 +684,3 @@ export class CommunitiesService {
 		this.fail(RpcStatus.NOT_FOUND, message)
 	}
 }
-

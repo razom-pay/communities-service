@@ -32,6 +32,22 @@ enum CommunityInviteStatus {
   @@map("community_invite_status")
 }
 
+enum InitiativeType {
+  CROWDFUNDING
+  WHOLESALE
+
+  @@map("initiative_type")
+}
+
+enum InitiativeStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+  CANCELLED
+
+  @@map("initiative_status")
+}
+
 model Community {
   id String @id @default(nanoid())
 
@@ -52,6 +68,7 @@ model Community {
   memberships CommunityMembership[]
   invites CommunityInvite[]
   bans CommunityBan[]
+  initiatives Initiative[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -112,4 +129,53 @@ model CommunityBan {
   @@unique([communityId, userId])
   @@index([expiresAt])
   @@map("community_bans")
+}
+
+model Initiative {
+  id String @id @default(nanoid())
+  communityId String @map("community_id")
+  createdByUserId String @map("created_by_user_id")
+
+  title String
+  description String?
+  type InitiativeType
+  status InitiativeStatus @default(ACTIVE)
+
+  deadline DateTime
+
+  // Crowdfunding specific
+  targetAmount Int? @map("target_amount") // Amount in kopiiky
+  minContribution Int? @map("min_contribution")
+  maxContribution Int? @map("max_contribution")
+  exactContribution Int? @map("exact_contribution")
+
+  // Wholesale specific
+  wholesaleMaxQuantity Int? @map("wholesale_max_quantity")
+  wholesaleTiers Json? @map("wholesale_tiers") // E.g. [{ minQuantity: 50, price: 30000 }]
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  contributions InitiativeContribution[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([communityId, status])
+  @@map("community_initiatives")
+}
+
+model InitiativeContribution {
+  id String @id @default(nanoid())
+  initiativeId String @map("initiative_id")
+  userId String @map("user_id")
+
+  amount Int // Contributed amount in kopiiky
+  status String @default("PENDING")
+
+  initiative Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([initiativeId, userId])
+  @@map("initiative_contributions")
 }

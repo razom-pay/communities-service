@@ -11,7 +11,6 @@ import { PrismaService } from '@/infra/prisma/prisma.service'
 export class CommunitiesRepository {
 	constructor(private readonly prismaService: PrismaService) {}
 
-
 	private db(
 		tx?: Prisma.TransactionClient
 	): PrismaClient | Prisma.TransactionClient {

@@ -4,6 +4,7 @@ import { LoggerModule } from 'nestjs-pino'
 
 import { PrismaModule } from './infra/prisma/prisma.module'
 import { CommunitiesModule } from './modules/communities/communities.module'
+import { InitiativesModule } from './modules/initiatives/initiatives.module'
 import { ObservabilityModule } from './observability/observability.module'
 
 @Module({
@@ -40,7 +41,8 @@ import { ObservabilityModule } from './observability/observability.module'
 		}),
 		ObservabilityModule,
 		PrismaModule,
-		CommunitiesModule
+		CommunitiesModule,
+		InitiativesModule
 	]
 })
 export class AppModule {}

@@ -92,7 +92,8 @@
 		"moduleNameMapper": {
 			"^@/(.*)$": "<rootDir>/$1",
 			"^@prisma/generated$": "<rootDir>/../prisma/generated",
-			"^@prisma/generated/(.*)$": "<rootDir>/../prisma/generated/$1"
+			"^@prisma/generated/(.*)$": "<rootDir>/../prisma/generated/$1",
+			"^(\\.{1,2}/.*)\\.js$": "$1"
 		},
 		"collectCoverageFrom": [
 			"**/*.(t|j)s"
